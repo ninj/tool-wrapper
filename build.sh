@@ -121,7 +121,7 @@ __TOOL__
     expected_version=$(extract_version "$tool_wrapper_config")
     "./$tool_wrapper" --help
     # assert
-    assert [ -x "$TOOL_USER_HOME/wrapper/dists/$tool-$expected_version/bin/$tool" ]
+    assert [ -x "$TOOL_USER_HOME/wrapper/dists/$tool-$expected_version"/*/"$tool-$expected_version/bin/$tool" ]
   )
 }
 

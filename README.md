@@ -15,10 +15,9 @@ This is a simulation of providing a wrapper called `toolw` for a tool called `to
 - `tool_user_home/wrapper/dists/tool-*/` - location of local tool installations.
 
 
-## Environment Variables
+## Wrapper Environment Variables
 
-These variables are for the made-up tool, rather than the wrapper.
-
+- `TOOLW_DEBUG` - enables trace debugging of wrapper if non-blank.
 
 
 ## Building
@@ -46,11 +45,11 @@ The dummy tool used to demonstrate wrapper has the following behaviour:
 - tool repo has layout like: `https://example.repo/location/0.0.1/tool.zip`
 - environment variables:
     - `TOOL_USER_HOME` - where to install tool locally, defaults to `$HOME/.tool`
-    - `TOOL_DEBUG` - enables trace debugging if non-blank.
 
 Note that the locally installed versions of the tool will go into `$TOOL_USER_HOME/wrapper`
 
 Some of these behaviours will be encoded into `build.sh` and `toolw`
+
 
 ## Copying As A Base For Custom Tools 
 

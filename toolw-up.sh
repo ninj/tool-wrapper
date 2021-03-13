@@ -27,7 +27,7 @@ generate_wrapper() {
 
 set -ueo pipefail
 
-[[ -n "${TOOL_DEBUG:-}" ]] && set -x
+[[ -n "${TOOLW_DEBUG:-}" ]] && set -x
 
 tool_user_home=${TOOL_USER_HOME:-$HOME/.tool}
 tool_wrapper_dir="$(dirname "$0")"
@@ -38,7 +38,7 @@ source "$tool_wrapper_config"
 
 get_version() {
   if [[ -z "$distributionUrl" ]]; then
-    1>&2 echo "distributionUrl not found in $tool_wrapper_config"
+    echo 1>&2 "distributionUrl not found in $tool_wrapper_config"
     exit 1
   fi
   [[ ${distributionUrl} =~ ^.*/(.*)/.*$ ]]
@@ -48,23 +48,28 @@ get_version() {
 main() {
   version="$(get_version)"
   tool_local_version_dir="$tool_user_home/wrapper/dists/tool-$version"
-  if [[ ! -d "$tool_local_version_dir" ]]; then
-    tool_local_install_temp_dir="$tool_user_home/wrapper/dists/tmp-""$$""$(date +"%s")"
+  read -r tool_local_version_home < <(shopt -s nullglob && ls -1 "$tool_local_version_dir"/*/"tool-$version")
+  if [[ ! -d "$tool_local_version_home" ]]; then
+    dist_id="$$""$(date +"%s")"
+    tool_local_install_temp_dir="$tool_user_home/wrapper/dists/tmp-$dist_id"
+    tool_local_version_home="$tool_local_version_dir/$dist_id/tool-$version"
     mkdir -p "$tool_local_install_temp_dir"
     (
       cd "$tool_local_install_temp_dir"
       if ! curl --show-error --silent "$distributionUrl" -o download.zip; then
-        1>&2 echo "could not download $distributionUrl"
+        echo 1>&2 "could not download $distributionUrl"
         exit 1
       fi
       unzip -q download.zip
       rm download.zip
     )
-    mv "$tool_local_install_temp_dir/$(ls "$tool_local_install_temp_dir")" "$tool_local_version_dir"
+    tool_local_install_temp_home="$tool_local_install_temp_dir/$(ls "$tool_local_install_temp_dir")"
+    chmod a+x "$tool_local_install_temp_home/bin"/*
+    mkdir -p "$(dirname "$tool_local_version_home")"
+    mv "$tool_local_install_temp_home" "$tool_local_version_home"
     rmdir "$tool_local_install_temp_dir"
-    chmod a+x "$tool_local_version_dir/bin"/*
   fi
-  exec "$tool_local_version_dir/bin/tool" "$@"
+  exec "$tool_local_version_home/bin/tool" "$@"
 }
 
 main "$@"
